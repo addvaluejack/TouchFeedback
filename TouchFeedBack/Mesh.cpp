@@ -1,4 +1,6 @@
 #include "Mesh.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <cstdlib>
 
 using namespace std;
@@ -97,11 +99,35 @@ C:\\Users\\game\\AppData\\Local\\Programs\\Python\\Python36\\Lib\\site-packages;
     glBindVertexArray(0);
 }
 
+void Mesh::loadTexture(const char *fileName) {
+    // Create one OpenGL texture
+    glGenTextures(1, &texture);
+
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    int w = 0, h = 0;
+    int compent = 0;
+
+    auto data = stbi_load(fileName, &w, &h, &compent, 3);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    // Nice trilinear filtering.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    STBI_FREE(data);
+}
+
 void Mesh::drawMesh()
 {
 	glBindVertexArray(VAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 	glBindVertexArray(0);
-
 }
 

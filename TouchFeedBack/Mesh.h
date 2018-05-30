@@ -21,11 +21,13 @@ class Mesh
 
 	GLuint VAO = 0;
 	GLuint VBO = 0;
+    GLuint texture = 0;
 
 public:
 	Mesh();
 	~Mesh();
 	void loadObjFile(const char *fileName);
+    void loadTexture(const char *fileName);
 	void drawMesh();
 };
 

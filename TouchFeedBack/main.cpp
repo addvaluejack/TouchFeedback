@@ -13,14 +13,10 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
 #include <vector>
-
 
 #include "Mesh.h"
 #include "joint.h"
@@ -65,9 +61,7 @@ string modelNames[] = {
     "little2",
     "little3",
 };
-GLuint modelTexture;
 Mesh plane;
-GLuint planeTexture;
 
 std::shared_ptr<Joint> handPoseJoints;
 
@@ -84,34 +78,6 @@ Shader regularProgram;
 
 bool useOriginal = true;
 TouchForce touchForce;
-
-
-GLuint loadTexture(const char * imagepath) {
-
-	// Create one OpenGL texture
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	int w = 0, h = 0;
-	int compent = 0;
-
-	auto data = stbi_load(imagepath, &w, &h, &compent, 3);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-
-	// Nice trilinear filtering.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	STBI_FREE(data);
-	// Return the ID of the texture we just created
-	return textureID;
-}
 
 void attachFrameBufferComponent(GLuint FBO,std::vector<GLuint> &colorTextures,GLuint DepthTexture)
 {
@@ -145,7 +111,6 @@ void attachFrameBufferComponent(GLuint FBO,std::vector<GLuint> &colorTextures,GL
 
 void loadModels()
 {
-    modelTexture = loadTexture("texture/model.jpg");
 	for (auto &name : modelNames)
 	{
 		models[name].loadObjFile(("models/" + name + ".obj").c_str());
@@ -207,7 +172,7 @@ void initOpenGLResource()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	plane.loadObjFile("models/panel.obj");
-    planeTexture = loadTexture("texture/panel.jpg");
+    plane.loadTexture("texture/panel.jpg");
 
 	loadModels();
 	const char * initPose = "root -1 0 0 0 0 0 0 1 1 1\n\
@@ -372,8 +337,6 @@ void render()
 	//draw plane
 	regularProgram.setUniform("model", mat4());
 	regularProgram.setUniform("isPlane", 1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, planeTexture);
 	plane.drawMesh();
 
 	regularProgram.setUniform("isPlane", 0);
@@ -382,7 +345,6 @@ void render()
 	{
 		auto joint=handPoseJoints->findJointPtr(kv.first);
 		regularProgram.setUniform("model", joint->getMatrix());
-        glBindTexture(GL_TEXTURE_2D, modelTexture);
 		kv.second.drawMesh();
 	}
 
