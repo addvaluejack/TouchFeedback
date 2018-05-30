@@ -5,3 +5,4 @@ TouchFeedback/Debug/
 TouchFeedback/Release/
 
 *.opendb
+*.db

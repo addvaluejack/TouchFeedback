@@ -114,6 +114,7 @@ void loadModels()
 	for (auto &name : modelNames)
 	{
 		models[name].loadObjFile(("models/" + name + ".obj").c_str());
+        models[name].loadTexture(("texture/" + name + ".jpg").c_str());
 	}
 }
 
