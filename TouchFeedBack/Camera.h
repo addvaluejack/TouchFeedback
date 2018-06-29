@@ -79,7 +79,7 @@ public:
 		float speedRatio = 1.0;
 		if (keyPressState[340])
 		{
-			speedRatio = 10.0;
+			speedRatio = 50.0;
 		}
 		if (keyPressState['A'])
 		{
